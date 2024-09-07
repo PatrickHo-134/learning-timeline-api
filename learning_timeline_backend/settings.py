@@ -111,6 +111,7 @@ MIDDLEWARE = [
 CORS_ALLOWED_ORIGINS = [
     'http://localhost:3000',
     'http://localhost:3001',
+    'https://learning-timeline-1010897e960e.herokuapp.com/',
 ]
 
 # Allow credentials (e.g., cookies, authorization headers) in CORS requests

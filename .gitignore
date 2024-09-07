@@ -1,0 +1,48 @@
+# virtual environment files
+venv/
+env/
+.venv/
+.env/
+.vscode/
+
+# database files
+db.sqlite3
+*.sqlite3
+*.db
+
+# static files collected during deployment
+staticfiles/
+
+# log files
+*.log
+
+# media files uploaded by users (if stored locally and not on a cloud storage)
+media/
+
+# compiled python files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# local development settings
+local_settings.py
+
+# build artifacts and production files
+build/
+dist/
+*.map
+
+# IDE and editor-specific files
+.vscode/
+.idea/
+
+
+# cache and log files
+.cache/
+.log/
+
+# environment variables file
+.env
+
+.DS_Store

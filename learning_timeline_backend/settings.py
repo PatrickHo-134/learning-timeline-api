@@ -29,9 +29,7 @@ SECRET_KEY = config("SECRET_KEY")
 DEBUG = False
 
 ALLOWED_HOSTS = [
-    'https://learning-timeline-1010897e960e.herokuapp.com/',
-    'localhost',
-    '127.0.0.1',
+    "*"
 ]
 
 
@@ -210,3 +208,6 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
 ]
+
+prod_db = dj_database_url.config(conn_max_age=600)
+DATABASES['default'].update(prod_db)

@@ -112,6 +112,8 @@ CORS_ALLOWED_ORIGINS = [
     'http://localhost:3000',
     'http://localhost:3001',
     'https://learning-timeline-1010897e960e.herokuapp.com/',
+    'http://192.168.0.141:3000',
+    'http://192.168.0.141:3001',
 ]
 
 # Allow credentials (e.g., cookies, authorization headers) in CORS requests

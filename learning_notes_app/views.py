@@ -102,8 +102,8 @@ def delete_label(request, label_id):
     except Label.DoesNotExist:
         return Response({"error": "Label not found"}, status=status.HTTP_404_NOT_FOUND)
 
-    if not request.user.has_perm('learning_notes_app.remove_label', label):
-        return Response({"error": "You do not have permission to remove this label"}, status=status.HTTP_403_FORBIDDEN)
+    if label.created_by != request.user:
+        return Response({"error": "You do not have permission to delete this label"}, status=status.HTTP_403_FORBIDDEN)
 
     label.delete()
 
@@ -192,9 +192,8 @@ def delete_learning_note(request, pk):
     except LearningNote.DoesNotExist:
         return Response({"error": "Learning note not found."}, status=status.HTTP_404_NOT_FOUND)
 
-    # Check if the user has permission to delete the learning note
-    if not request.user.has_perm('learning_notes_app.delete_learning_note', learning_note):
-        return Response({"error": "You do not have permission to delete this learning note."}, status=status.HTTP_403_FORBIDDEN)
+    if learning_note.user_id != request.user.id:
+        return Response({"error": "You do not have permission to delete this note"}, status=status.HTTP_403_FORBIDDEN)
 
     learning_note.delete()
 

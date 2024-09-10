@@ -19,6 +19,9 @@ class Label(models.Model):
     color = models.CharField(max_length=7) # for storing hex color codes
     created_by = models.ForeignKey(User, on_delete=models.CASCADE)
 
+    class Meta:
+        db_table = 'label'
+
     def __str__(self):
         return self.name
 
@@ -33,6 +36,7 @@ class LearningNote(models.Model):
     labels = models.ManyToManyField(Label, related_name='learning_notes')
 
     class Meta:
+        db_table = 'learning_note'
         ordering = ['-created_at']  # Order notes by most recent first
         verbose_name = 'Learning Note'
         verbose_name_plural = 'Learning Notes'

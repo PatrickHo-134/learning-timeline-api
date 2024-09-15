@@ -1,3 +1,4 @@
+from gc import collect
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.decorators import action, api_view, permission_classes
@@ -9,15 +10,17 @@ from rest_framework_simplejwt.views import TokenObtainPairView
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
 from django.contrib.auth.hashers import make_password
-from .models import LearningNote, User, Label
-from .serializers import LearningNoteSerializer, UserSerializer, UserSerializerWithToken, LabelSerializer
+from .models import Collection, LearningNote, User, Label
+from .serializers import CollectionSerializer, LearningNoteSerializer, UserSerializer, UserSerializerWithToken, LabelSerializer
 from django.http import HttpResponse
+
 
 def home(request):
     return HttpResponse("Welcome to the Home Page!")
 
 #################
 # USER SECTION
+
 
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
     def validate(self, attrs):
@@ -110,7 +113,7 @@ def delete_label(request, label_id):
     return Response({'message': 'Label deleted successfully'}, status=status.HTTP_200_OK)
 
 
-##########################
+#######################
 # LEARNING NOTE SECTION
 
 @api_view(['GET'])
@@ -131,9 +134,8 @@ def archive_learning_note(request, pk):
     except LearningNote.DoesNotExist:
         return Response({"error": "Learning note not found."}, status=status.HTTP_404_NOT_FOUND)
 
-    # Check if the user has permission to archive the learning note (optional)
-    if not request.user.has_perm('learning_notes_app.archive_learning_note', learning_note):
-        return Response({"error": "You do not have permission to archive this learning note."}, status=status.HTTP_403_FORBIDDEN)
+    if learning_note.user_id != request.user.id:
+        return Response({"error": "You do not have permission to delete this note"}, status=status.HTTP_403_FORBIDDEN)
 
     learning_note.archived = True
     learning_note.save()
@@ -229,3 +231,78 @@ def remove_label_to_learning_note(request, note_id):
         note.save()
 
     return Response(status=status.HTTP_200_OK)
+
+
+@api_view(['PUT'])
+@permission_classes([IsAuthenticated])
+def add_note_to_collection(request, note_id):
+    try:
+        note = LearningNote.objects.get(id=note_id, user=request.user)
+        collection_id = request.data.get('collection_id')
+
+        if collection_id:
+            collection = Collection.objects.get(
+                id=collection_id, created_by=request.user)
+            note.collection = collection
+            note.save()
+
+            return Response({"message": "Note added to collection successfully"})
+        else:
+            return Response({"error": "Collection ID is required"}, status=400)
+    except LearningNote.DoesNotExist:
+        return Response({"error": "Learning note not found"}, status=404)
+    except Collection.DoesNotExist:
+        return Response({"error": "Collection not found"}, status=404)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_notes_by_collection(request, collection_id):
+    try:
+        collection = Collection.objects.get(
+            id=collection_id, created_by=request.user)
+        notes = LearningNote.objects.filter(
+            collection=collection, user=request.user)
+        serializer = LearningNoteSerializer(notes, many=True)
+
+        return Response(serializer.data)
+    except Collection.DoesNotExist:
+        return Response({"error": "Collection not found"}, status=404)
+
+
+####################
+# COLLECTION SECTION
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def fetch_user_collections(request, pk):
+    collections = Collection.objects.filter(created_by=pk)
+    serializer = CollectionSerializer(collections, many=True)
+
+    return Response(serializer.data)
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def create_collection(request):
+    user = request.user
+    name = request.data.get('name')
+
+    if name:
+        collection = Collection.objects.create(created_by=user, name=name)
+        serializer = CollectionSerializer(collection)
+        return Response(serializer.data)
+    else:
+        return Response({'error': 'Collection name is required'}, status=400)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def archive_collection(request, collection_id):
+    try:
+        collection = Collection.objects.get(
+            id=collection_id, created_by=request.user)
+        collection.archive_collection()
+
+        return Response({"message": "Collection archived successfully"})
+    except Collection.DoesNotExist:
+        return Response({"error": "Collection not found"}, status=404)

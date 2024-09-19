@@ -28,7 +28,7 @@ urlpatterns = [
     path('api/users/profile/', views.getUserProfile, name='user-profile'),
     path('api/users/', views.getUsers, name='user-profile'),
 
-    path("api/timeline/<int:pk>/", views.fetch_timeline, name='timeline'),
+    path("api/timeline/<int:user_id>/", views.fetch_timeline, name='timeline'),
     path("api/learning_notes/create/<int:userId>/",
          views.add_learning_note, name='add-learning-note'),
     path("api/learning_notes/update/<int:pk>/",

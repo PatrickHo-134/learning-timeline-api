@@ -1,3 +1,4 @@
+from django.shortcuts import get_object_or_404
 from gc import collect
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -13,6 +14,7 @@ from django.contrib.auth.hashers import make_password
 from .models import Collection, LearningNote, User, Label
 from .serializers import CollectionSerializer, LearningNoteSerializer, UserSerializer, UserSerializerWithToken, LabelSerializer
 from django.http import HttpResponse
+import json
 
 
 def home(request):
@@ -118,12 +120,56 @@ def delete_label(request, label_id):
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
-def fetch_timeline(request, pk):
-    learning_notes = LearningNote.objects.filter(
-        archived=False, user=pk).order_by('-created_at')
+def fetch_timeline(request, user_id):
+    """
+    Fetch learning notes by collection and optionally filter by labels.
+    """
+    collection_id_str = request.GET.get('collection_id', 0)
+    label_ids_str = request.GET.get('labels', None)
+
+    try:
+        collection_id = int(collection_id_str)
+    except ValueError:
+        return Response({'error': 'Invalid collection_id'}, status=status.HTTP_400_BAD_REQUEST)
+
+    if label_ids_str:
+        try:
+            label_ids = json.loads(label_ids_str)
+            label_ids = list(map(int, label_ids))
+        except ValueError:
+            return Response({'error': 'Invalid label ID in labels list'}, status=status.HTTP_400_BAD_REQUEST)
+    else:
+        label_ids = []
+
+    # First, fetch learning notes based on the selected collection (if provided)
+    if collection_id is not None:
+        if collection_id == 0: # default category that indicates fetching all notes
+            learning_notes = LearningNote.objects.filter(archived=False, user=user_id)
+        else:
+            collection = get_object_or_404(Collection, id=collection_id, created_by=user_id)
+            learning_notes = LearningNote.objects.filter(user=user_id, collection=collection, archived=False)
+    else:
+        return Response({'error': 'Invalid collection ID in collections list'}, status=status.HTTP_400_BAD_REQUEST)
+
+    if label_ids:
+        # Query all labels associated with this user
+        user_labels = Label.objects.filter(created_by=user_id, id__in=label_ids)
+        user_label_ids = set(user_labels.values_list('id', flat=True))
+
+        # Check for any label IDs that are not associated with the user
+        invalid_label_ids = set(label_ids) - user_label_ids
+
+        if invalid_label_ids:
+            return Response({"error": f"Invalid labels: {list(invalid_label_ids)}"}, status=status.HTTP_400_BAD_REQUEST)
+
+    if len(label_ids) > 0:
+        learning_notes = learning_notes.filter(labels__id__in=label_ids).distinct()
+
+    learning_notes = learning_notes.order_by('-created_at')
+
     serializer = LearningNoteSerializer(learning_notes, many=True)
 
-    return Response(serializer.data)
+    return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 @api_view(['POST'])
@@ -238,7 +284,7 @@ def remove_label_to_learning_note(request, note_id):
 def add_note_to_collection(request, note_id):
     try:
         note = LearningNote.objects.get(id=note_id, user=request.user)
-        collection_id = request.data.get('collection_id')
+        collection_id = request.data.get('collectionId')
 
         if collection_id:
             collection = Collection.objects.get(
@@ -276,10 +322,11 @@ def get_notes_by_collection(request, collection_id):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def fetch_user_collections(request, pk):
-    collections = Collection.objects.filter(created_by=pk)
+    collections = Collection.objects.filter(created_by=pk, is_archived=False)
     serializer = CollectionSerializer(collections, many=True)
 
     return Response(serializer.data)
+
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])

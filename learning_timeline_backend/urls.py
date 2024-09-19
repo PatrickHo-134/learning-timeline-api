@@ -28,7 +28,7 @@ urlpatterns = [
     path('api/users/profile/', views.getUserProfile, name='user-profile'),
     path('api/users/', views.getUsers, name='user-profile'),
 
-    path("api/timeline/<int:pk>/", views.fetch_timeline, name='timeline'),
+    path("api/timeline/<int:user_id>/", views.fetch_timeline, name='timeline'),
     path("api/learning_notes/create/<int:userId>/",
          views.add_learning_note, name='add-learning-note'),
     path("api/learning_notes/update/<int:pk>/",
@@ -41,8 +41,20 @@ urlpatterns = [
          views.add_label_to_learning_note, name='add-label-to-learning-note'),
     path('api/learning-notes/<int:note_id>/remove-label/',
          views.remove_label_to_learning_note, name='remove-label-from-learning-note'),
+    path('api/learning_notes/<int:note_id>/add_to_collection/',
+         views.add_note_to_collection, name='add-note-to-collection'),
 
     path('api/labels/<int:pk>/', views.label_list, name='label-list'),
     path('api/labels/create/', views.create_label, name='create-label'),
-    path('api/labels/delete-label/<int:label_id>/', views.delete_label, name='delete-label'),
+    path('api/labels/delete-label/<int:label_id>/',
+         views.delete_label, name='delete-label'),
+
+    path('api/collection/list/<int:pk>/',
+         views.fetch_user_collections, name='collection-list'),
+    path('api/collection/<int:collection_id>/',
+         views.get_notes_by_collection, name='get-notes-by-collection'),
+    path('api/collection/create/', views.create_collection,
+         name='create-collection'),
+    path('api/collection/<int:collection_id>/archive/',
+         views.archive_collection, name='archive-collection'),
 ]

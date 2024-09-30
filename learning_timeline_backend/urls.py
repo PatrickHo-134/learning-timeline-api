@@ -16,45 +16,46 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from learning_notes_app import views
+from learning_notes_app import views, user_views, learning_note_views, label_views, collection_views
 
 urlpatterns = [
     path('', views.home, name='home'),
     path("admin/", admin.site.urls),
 
-    path('api/users/login/', views.MyTokenObtainPairView.as_view(),
+    path('api/users/login/', user_views.MyTokenObtainPairView.as_view(),
          name='token-obtain-pair'),
-    path('api/users/register/', views.registerUser, name='regiter-user'),
-    path('api/users/profile/', views.getUserProfile, name='user-profile'),
-    path('api/users/', views.getUsers, name='user-profile'),
+    path('api/users/register/', user_views.registerUser, name='regiter-user'),
+    path('api/users/profile/', user_views.getUserProfile, name='user-profile'),
+    path('api/users/', user_views.getUsers, name='user-profile'),
 
-    path("api/timeline/<int:user_id>/", views.fetch_timeline, name='timeline'),
+    path("api/timeline/<int:user_id>/",
+         learning_note_views.fetch_timeline, name='timeline'),
     path("api/learning_notes/create/<int:userId>/",
-         views.add_learning_note, name='add-learning-note'),
+         learning_note_views.add_learning_note, name='add-learning-note'),
     path("api/learning_notes/update/<int:pk>/",
-         views.update_learning_note, name='update-learning-note'),
+         learning_note_views.update_learning_note, name='update-learning-note'),
     path('api/learning_notes/<int:pk>/archive/',
-         views.archive_learning_note, name='archive-learning-note'),
+         learning_note_views.archive_learning_note, name='archive-learning-note'),
     path('api/learning_notes/<int:pk>/delete/',
-         views.delete_learning_note, name='delete-learning-note'),
+         learning_note_views.delete_learning_note, name='delete-learning-note'),
     path('api/learning-notes/<int:note_id>/add-label/',
-         views.add_label_to_learning_note, name='add-label-to-learning-note'),
+         learning_note_views.add_label_to_learning_note, name='add-label-to-learning-note'),
     path('api/learning-notes/<int:note_id>/remove-label/',
-         views.remove_label_to_learning_note, name='remove-label-from-learning-note'),
+         learning_note_views.remove_label_from_learning_note, name='remove-label-from-learning-note'),
     path('api/learning_notes/<int:note_id>/add_to_collection/',
-         views.add_note_to_collection, name='add-note-to-collection'),
+         learning_note_views.add_note_to_collection, name='add-note-to-collection'),
+    path('api/collection/<int:collection_id>/',
+         learning_note_views.get_notes_by_collection, name='get-notes-by-collection'),
 
-    path('api/labels/<int:pk>/', views.label_list, name='label-list'),
-    path('api/labels/create/', views.create_label, name='create-label'),
+    path('api/labels/<int:pk>/', label_views.label_list, name='label-list'),
+    path('api/labels/create/', label_views.create_label, name='create-label'),
     path('api/labels/delete-label/<int:label_id>/',
-         views.delete_label, name='delete-label'),
+         label_views.delete_label, name='delete-label'),
 
     path('api/collection/list/<int:pk>/',
-         views.fetch_user_collections, name='collection-list'),
-    path('api/collection/<int:collection_id>/',
-         views.get_notes_by_collection, name='get-notes-by-collection'),
-    path('api/collection/create/', views.create_collection,
-         name='create-collection'),
+         collection_views.fetch_user_collections, name='collection-list'),
+    path('api/collection/create/',
+         collection_views.create_collection, name='create-collection'),
     path('api/collection/<int:collection_id>/archive/',
-         views.archive_collection, name='archive-collection'),
+         collection_views.archive_collection, name='archive-collection'),
 ]

@@ -8,12 +8,10 @@ class LearningNotePagination(PageNumberPagination):
 
     def get_paginated_response(self, data):
         return Response({
-            'count': self.page.paginator.count,  # Total number of learning notes
-            'total_pages': self.page.paginator.num_pages,  # Total number of pages
-            'current_page': self.page.number,  # Current page number
-            # Next page number
+            'count': self.page.paginator.count,
+            'total_pages': self.page.paginator.num_pages,
+            'current_page': self.page.number,
             'next_page': self.page.next_page_number() if self.page.has_next() else None,
-            # Previous page number
             'previous_page': self.page.previous_page_number() if self.page.has_previous() else None,
             'results': data  # Paginated learning notes
         })

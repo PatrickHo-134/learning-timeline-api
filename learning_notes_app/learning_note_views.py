@@ -5,6 +5,7 @@ from rest_framework import status, permissions
 from rest_framework.permissions import IsAuthenticated
 from .models import Collection, LearningNote, Label
 from .serializers import LearningNoteSerializer
+from .learning_note_pagination import LearningNotePagination
 import json
 
 
@@ -12,7 +13,7 @@ import json
 @permission_classes([IsAuthenticated])
 def fetch_timeline(request, user_id):
     """
-    Fetch learning notes by collection and optionally filter by labels.
+    Fetch learning notes by collection and optionally filter by labels with pagination.
     """
     collection_id_str = request.GET.get('collection_id', 0)
     label_ids_str = request.GET.get('labels', None)
@@ -31,9 +32,8 @@ def fetch_timeline(request, user_id):
     else:
         label_ids = []
 
-    # First, fetch learning notes based on the selected collection (if provided)
     if collection_id is not None:
-        if collection_id == 0:  # default category that indicates fetching all notes
+        if collection_id == 0:  # Default category that indicates fetching all notes
             learning_notes = LearningNote.objects.filter(
                 archived=False, user=user_id)
         else:
@@ -46,8 +46,7 @@ def fetch_timeline(request, user_id):
 
     if label_ids:
         # Query all labels associated with this user
-        user_labels = Label.objects.filter(
-            created_by=user_id, id__in=label_ids)
+        user_labels = Label.objects.filter(created_by=user_id, id__in=label_ids)
         user_label_ids = set(user_labels.values_list('id', flat=True))
 
         # Check for any label IDs that are not associated with the user
@@ -56,15 +55,17 @@ def fetch_timeline(request, user_id):
         if invalid_label_ids:
             return Response({"error": f"Invalid labels: {list(invalid_label_ids)}"}, status=status.HTTP_400_BAD_REQUEST)
 
-    if len(label_ids) > 0:
-        learning_notes = learning_notes.filter(
-            labels__id__in=label_ids).distinct()
+        if len(label_ids) > 0:
+            learning_notes = learning_notes.filter(labels__id__in=label_ids).distinct()
 
     learning_notes = learning_notes.order_by('-created_at')
 
-    serializer = LearningNoteSerializer(learning_notes, many=True)
+    paginator = LearningNotePagination()
+    paginated_learning_notes = paginator.paginate_queryset(learning_notes, request)
 
-    return Response(serializer.data, status=status.HTTP_200_OK)
+    serializer = LearningNoteSerializer(paginated_learning_notes, many=True)
+
+    return paginator.get_paginated_response(serializer.data)
 
 
 @api_view(['POST'])

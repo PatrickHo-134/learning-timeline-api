@@ -1,4 +1,4 @@
-# Learning Note API
+# Learning Timeline API
 This repository contains the backend API for the Learning Note application. The API is designed to manage learning notes, labels, and collections. It provides endpoints for creating, reading, updating, and deleting notes, as well as managing user authentication, note categorization through collections, and labeling features.
 
 The API is built using Django and Django REST Framework (DRF), ensuring scalability, security, and ease of integration with the frontend. It also includes user management, collection archiving, and a robust system for associating labels with notes.
@@ -13,7 +13,7 @@ The API is built using Django and Django REST Framework (DRF), ensuring scalabil
 
 ## Prerequisites
 
-Before setting up and running the Learning Note API locally, ensure you have the following installed on your machine:
+Before setting up and running the Learning Timeline API locally, ensure you have the following installed on your machine:
 
 ### 1. Python 3.8+
 The backend is built with Python 3.8 or later. Ensure you have Python installed by running:
@@ -67,7 +67,7 @@ If not, install pip by following the instructions [here](https://pip.pypa.io/en/
 
 ## Setup and Installation
 
-Follow these steps to set up the Learning Note API project on your local machine.
+Follow these steps to set up the Learning Timeline API project on your local machine.
 
 ### 1. Clone the Repository
 First, clone the backend repository from GitHub to your local machine using the following command:
@@ -193,7 +193,7 @@ To be updated
 
 ## Contributing
 
-We welcome contributions to the Learning Note API! Whether it's fixing bugs, adding new features, improving documentation, or suggesting improvements, we appreciate your effort to help make this project better.
+We welcome contributions to the Learning Timeline API! Whether it's fixing bugs, adding new features, improving documentation, or suggesting improvements, we appreciate your effort to help make this project better.
 
 ### How to Contribute
 

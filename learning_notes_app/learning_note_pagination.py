@@ -2,7 +2,7 @@ from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 
 class LearningNotePagination(PageNumberPagination):
-    page_size = 5  # Number of learning notes per page
+    page_size = 10
     page_size_query_param = 'page_size'  # Allow overriding the default page size
     max_page_size = 100
 

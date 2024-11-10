@@ -99,8 +99,16 @@ def add_learning_note(request, userId):
         else:
             learning_note = serializer.save(user=user)
             learning_note_labels = request.data.get('labels')
+            learning_note_category = request.data.get('selected_category')
+
             if learning_note_labels:
                 learning_note.labels.set(learning_note_labels)
+
+            if learning_note_category:
+                collection = Collection.objects.get(id=learning_note_category, created_by=request.user)
+                learning_note.collection = collection
+                learning_note.save()
+
             return Response(serializer.data, status=status.HTTP_201_CREATED)
     else:
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

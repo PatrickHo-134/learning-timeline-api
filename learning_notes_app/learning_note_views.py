@@ -1,4 +1,5 @@
 from django.shortcuts import get_object_or_404
+from django.contrib.postgres.search import SearchQuery, SearchRank
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework import status, permissions
@@ -218,3 +219,20 @@ def get_notes_by_collection(request, collection_id):
         return Response(serializer.data)
     except Collection.DoesNotExist:
         return Response({"error": "Collection not found"}, status=404)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def search_learning_notes(request):
+    query = request.GET.get('query', '')
+    if query:
+        search_query = SearchQuery(query)
+        learning_notes = LearningNote.objects.annotate(
+            rank=SearchRank('search_vector', search_query)
+        ).filter(search_vector=search_query).order_by('-rank')[:10]
+    else:
+        learning_notes = []
+
+    serializer = LearningNoteSerializer(learning_notes, many=True)
+
+    return Response(serializer.data)

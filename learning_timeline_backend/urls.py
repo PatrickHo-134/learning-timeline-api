@@ -44,6 +44,8 @@ urlpatterns = [
          learning_note_views.remove_label_from_learning_note, name='remove-label-from-learning-note'),
     path('api/learning_notes/<int:note_id>/add_to_collection/',
          learning_note_views.add_note_to_collection, name='add-note-to-collection'),
+    path('api/learning_notes/search_learning_notes/',
+         learning_note_views.search_learning_notes, name='search-learning-notes'),
     path('api/collection/<int:collection_id>/',
          learning_note_views.get_notes_by_collection, name='get-notes-by-collection'),
 

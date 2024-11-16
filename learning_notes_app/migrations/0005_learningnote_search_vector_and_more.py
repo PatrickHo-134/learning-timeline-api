@@ -35,4 +35,12 @@ class Migration(migrations.Migration):
                 fields=["search_vector"], name="learning_no_search__6981de_gin"
             ),
         ),
+        migrations.RunSQL(
+            """
+            CREATE TRIGGER learningnote_search_vector_update
+            BEFORE INSERT OR UPDATE ON learning_note
+            FOR EACH ROW EXECUTE FUNCTION
+            tsvector_update_trigger(search_vector, 'pg_catalog.english', title, content);
+            """
+        ),
     ]

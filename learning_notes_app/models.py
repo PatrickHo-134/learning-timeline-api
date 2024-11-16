@@ -72,7 +72,6 @@ class LearningNote(models.Model):
         if not self.id:
             self.created_at = timezone.now()
         self.updated_at = timezone.now()
-        self.search_vector = SearchVector('title', 'content')
         super(LearningNote, self).save(*args, **kwargs)
 
     def __str__(self):

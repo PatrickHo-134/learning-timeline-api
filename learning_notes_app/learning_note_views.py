@@ -1,4 +1,6 @@
+from cmath import isnan
 from django.shortcuts import get_object_or_404
+from django.contrib.postgres.search import SearchQuery, SearchRank
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework import status, permissions
@@ -199,8 +201,6 @@ def add_note_to_collection(request, note_id):
             return Response({"message": "Note added to collection successfully"})
         else:
             return Response({"error": "Collection ID is required"}, status=400)
-    except LearningNote.DoesNotExist:
-        return Response({"error": "Learning note not found"}, status=404)
     except Collection.DoesNotExist:
         return Response({"error": "Collection not found"}, status=404)
 
@@ -218,3 +218,24 @@ def get_notes_by_collection(request, collection_id):
         return Response(serializer.data)
     except Collection.DoesNotExist:
         return Response({"error": "Collection not found"}, status=404)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def search_learning_notes(request):
+    query = request.GET.get('query', '')
+    user_id = request.GET.get('userId')
+
+    if query and user_id:
+        search_query = SearchQuery(query)
+        learning_notes = LearningNote.objects.annotate(
+            rank=SearchRank('search_vector', search_query)
+        ).filter(search_vector=search_query, user=user_id).order_by('-rank')[:10]
+    else:
+        learning_notes = []
+
+    if user_id:
+        serializer = LearningNoteSerializer(learning_notes, many=True)
+        return Response(serializer.data)
+    else:
+        return Response({"error": "UserId is missing"}, status=404)

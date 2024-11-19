@@ -2,19 +2,9 @@ from pyexpat import model
 from django.db import models
 from django.contrib.auth.models import User, AbstractUser
 from django.utils import timezone
-
-# class User(AbstractUser):
-#     id = models.AutoField(primary_key=True)
-#     first_name = models.CharField(max_length=30)
-#     last_name = models.CharField(max_length=30)
-#     email = models.EmailField(unique=True)
-#     password = models.CharField(max_length=128)
-#     created_at = models.DateTimeField(auto_now_add=True)
-#     last_login_at = models.DateTimeField(blank=True, null=True)
-
-#     def __str__(self):
-#         return f"{self.first_name} {self.last_name}"
-
+from django.contrib.postgres.search import SearchVectorField
+from django.contrib.postgres.indexes import GinIndex
+from django.contrib.postgres.search import SearchVector
 
 class Label(models.Model):
     name = models.CharField(max_length=100, unique=True)
@@ -65,6 +55,9 @@ class LearningNote(models.Model):
     collection = models.ForeignKey(
         Collection, null=True, blank=True, on_delete=models.SET_NULL, related_name='collection_notes')
 
+    # Add SearchVectorField for full-text search
+    search_vector = SearchVectorField(null=True)
+
     class Meta:
         db_table = 'learning_note'
         ordering = ['-created_at']  # Order notes by most recent first
@@ -72,6 +65,7 @@ class LearningNote(models.Model):
         verbose_name_plural = 'Learning Notes'
         indexes = [
             models.Index(fields=['user', 'created_at']),
+            GinIndex(fields=['search_vector']),
         ]
 
     def save(self, *args, **kwargs):

@@ -242,14 +242,7 @@ def search_learning_notes(request):
     else:
         return Response({"error": "UserId is missing"}, status=404)
 
-@api_view(['POST'])
-@permission_classes([IsAuthenticated])
-def generate_questions(request):
-    html_content = request.data.get("content", "")
-
-    if not html_content:
-        return Response({"error": "Content is required"}, status=400)
-
+def generate_new_questions(html_content):
     plain_text_content = extract_text_from_html(html_content)
     content_length = len(plain_text_content.split())
 
@@ -265,6 +258,30 @@ def generate_questions(request):
     question_generator = QuestionGenerator()
 
     questions_data = question_generator.generate_questions(plain_text_content, num_questions)
+
+    return questions_data
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def generate_questions(request):
+    note_id = request.data.get('id')
+    html_content = request.data.get("content", "")
+
+    if not note_id:
+        return Response({"error": "Note's Id is required"}, status=400)
+    elif not html_content:
+        return Response({"error": "Content is required"}, status=400)
+
+    note = LearningNote.objects.get(id=note_id)
+
+    if note and note.generated_questions:
+        questions_data = note.generated_questions
+    elif note and not note.generated_questions:
+        questions_data = generate_new_questions(html_content)
+        note.generated_questions = questions_data
+        note.save()
+    else:
+        return Response({"error": "Learning note not found"}, status=404)
 
     if "error" in questions_data:
         return Response({"error": questions_data["error"]}, status=500)

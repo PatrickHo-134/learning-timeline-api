@@ -8,6 +8,8 @@ from rest_framework.permissions import IsAuthenticated
 from .models import Collection, LearningNote, Label
 from .serializers import LearningNoteSerializer
 from .learning_note_pagination import LearningNotePagination
+from .question_generator import QuestionGenerator
+from .utils import extract_text_from_html
 import json
 
 
@@ -239,3 +241,32 @@ def search_learning_notes(request):
         return Response(serializer.data)
     else:
         return Response({"error": "UserId is missing"}, status=404)
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def generate_questions(request):
+    html_content = request.data.get("content", "")
+
+    if not html_content:
+        return Response({"error": "Content is required"}, status=400)
+
+    plain_text_content = extract_text_from_html(html_content)
+    content_length = len(plain_text_content.split())
+
+    if content_length <= 100:
+        num_questions = 1
+    elif content_length > 100 and content_length <= 200:
+        num_questions = 2
+    elif content_length > 200 and content_length <= 500:
+        num_questions = 4
+    else:
+        num_questions = 5
+
+    question_generator = QuestionGenerator()
+
+    questions_data = question_generator.generate_questions(plain_text_content, num_questions)
+
+    if "error" in questions_data:
+        return Response({"error": questions_data["error"]}, status=500)
+
+    return Response({"questions": questions_data})

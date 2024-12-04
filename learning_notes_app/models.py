@@ -54,6 +54,7 @@ class LearningNote(models.Model):
     labels = models.ManyToManyField(Label, related_name='learning_notes')
     collection = models.ForeignKey(
         Collection, null=True, blank=True, on_delete=models.SET_NULL, related_name='collection_notes')
+    generated_questions = models.JSONField(null=True, blank=True)
 
     # Add SearchVectorField for full-text search
     search_vector = SearchVectorField(null=True)

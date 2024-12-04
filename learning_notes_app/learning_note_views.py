@@ -8,6 +8,8 @@ from rest_framework.permissions import IsAuthenticated
 from .models import Collection, LearningNote, Label
 from .serializers import LearningNoteSerializer
 from .learning_note_pagination import LearningNotePagination
+from .question_generator import QuestionGenerator
+from .utils import extract_text_from_html
 import json
 
 
@@ -239,3 +241,49 @@ def search_learning_notes(request):
         return Response(serializer.data)
     else:
         return Response({"error": "UserId is missing"}, status=404)
+
+def generate_new_questions(html_content):
+    plain_text_content = extract_text_from_html(html_content)
+    content_length = len(plain_text_content.split())
+
+    if content_length <= 100:
+        num_questions = 1
+    elif content_length > 100 and content_length <= 200:
+        num_questions = 2
+    elif content_length > 200 and content_length <= 500:
+        num_questions = 4
+    else:
+        num_questions = 5
+
+    question_generator = QuestionGenerator()
+
+    questions_data = question_generator.generate_questions(plain_text_content, num_questions)
+
+    return questions_data
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def generate_questions(request):
+    note_id = request.data.get('id')
+    html_content = request.data.get("content", "")
+
+    if not note_id:
+        return Response({"error": "Note's Id is required"}, status=400)
+    elif not html_content:
+        return Response({"error": "Content is required"}, status=400)
+
+    note = LearningNote.objects.get(id=note_id)
+
+    if note and note.generated_questions:
+        questions_data = note.generated_questions
+    elif note and not note.generated_questions:
+        questions_data = generate_new_questions(html_content)
+        note.generated_questions = questions_data
+        note.save()
+    else:
+        return Response({"error": "Learning note not found"}, status=404)
+
+    if "error" in questions_data:
+        return Response({"error": questions_data["error"]}, status=500)
+
+    return Response({"questions": questions_data})

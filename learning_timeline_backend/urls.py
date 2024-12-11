@@ -46,6 +46,8 @@ urlpatterns = [
          learning_note_views.add_note_to_collection, name='add-note-to-collection'),
     path('api/learning_notes/search_learning_notes/',
          learning_note_views.search_learning_notes, name='search-learning-notes'),
+    path('api/learning_notes/generate_questions/',
+         learning_note_views.generate_questions, name='generate-questions-for-note'),
     path('api/collection/<int:collection_id>/',
          learning_note_views.get_notes_by_collection, name='get-notes-by-collection'),
 

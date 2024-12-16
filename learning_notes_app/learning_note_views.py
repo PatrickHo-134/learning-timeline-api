@@ -256,6 +256,7 @@ def generate_new_questions(html_content):
         num_questions = 5
 
     question_generator = QuestionGenerator()
+    print(question_generator.api_key)
 
     questions_data = question_generator.generate_questions(plain_text_content, num_questions)
 

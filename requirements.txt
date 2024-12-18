@@ -13,5 +13,5 @@ pytz==2024.1
 sqlparse==0.5.1
 typing_extensions==4.12.2
 whitenoise==6.7.0
-openai==1.55.0
+openai==1.55.3
 beautifulsoup4==4.12.3

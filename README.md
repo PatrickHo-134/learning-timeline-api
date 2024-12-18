@@ -1,4 +1,4 @@
-# Learning Timeline API [3.0.0]
+# Learning Timeline API [3.0.1]
 This repository contains the backend API for the Learning Note application. The API is designed to manage learning notes, labels, and collections. It provides endpoints for creating, reading, updating, and deleting notes, as well as managing user authentication, note categorization through collections, and labeling features.
 
 The API is built using Django and Django REST Framework (DRF), ensuring scalability, security, and ease of integration with the frontend. It also includes user management, collection archiving, and a robust system for associating labels with notes.

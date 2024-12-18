@@ -1,9 +1,6 @@
 from operator import truediv
 from openai import OpenAI
 from decouple import config
-import logging
-
-logger = logging.getLogger(__name__)
 
 # README: documentation of Openai's API https://platform.openai.com/docs/api-reference/chat/create
 
@@ -40,8 +37,6 @@ class QuestionGenerator:
           self.engine = "gpt-4o-mini"
           self.max_tokens = 1000
           self.temperature = 0.7  # Controls the creativity of the output
-
-          logger.info(f"OpenAI API Key: {self.api_key}")
 
           self.client = OpenAI(
                organization=config('OPENAI_ORG_ID'),

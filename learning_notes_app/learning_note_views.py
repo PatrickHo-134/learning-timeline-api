@@ -12,7 +12,6 @@ from .question_generator import QuestionGenerator
 from .utils import extract_text_from_html
 import json
 
-
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def fetch_timeline(request, user_id):
@@ -256,7 +255,6 @@ def generate_new_questions(html_content):
         num_questions = 5
 
     question_generator = QuestionGenerator()
-    print(question_generator.api_key)
 
     questions_data = question_generator.generate_questions(plain_text_content, num_questions)
 

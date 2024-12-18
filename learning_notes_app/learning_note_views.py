@@ -12,7 +12,6 @@ from .question_generator import QuestionGenerator
 from .utils import extract_text_from_html
 import json
 
-
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def fetch_timeline(request, user_id):
